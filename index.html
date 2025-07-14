@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiver Report: Generative KI & KI-Agenten</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Ivory Neutral (Background: #F8F7F4, Text: #3D405B, Primary: #81B29A, Secondary: #E07A5F) -->
+    <!-- Application Structure Plan: A thematic, single-page application with a sticky top navigation bar ("Grundlagen", "Die Synergie", "Anwendungen", "Risiken & Zukunft"). This structure breaks from the linear report format to group related concepts for better usability. For example, it presents both GenAI and Agents under "Grundlagen" before explaining their interaction in "Die Synergie". The user flow is guided by interactive discovery (clicking tabs, expanding cards, exploring diagrams) rather than passive scrolling, making the dense information more accessible and engaging. -->
+    <!-- Visualization & Content Choices: The application uses interactive elements to explain key concepts. GOAL: Compare AI types -> VIZ: Interactive HTML table. GOAL: Explain architectures -> VIZ: Tabbed interface with HTML/CSS diagrams and a Chart.js radar chart for comparison. GOAL: Show agent hierarchy -> VIZ: Clickable vertical stepped diagram (HTML/CSS). GOAL: Explain synergy -> VIZ: Central animated diagram (HTML/CSS) with JS-driven text updates. GOAL: Showcase risks -> VIZ: Interactive table with hover effects. This approach prioritizes user engagement and clarity over static text, translating the report's academic structure into an exploratory experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #F8F7F4;
+            color: #3D405B;
+            font-family: 'Inter', sans-serif;
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #E07A5F;
+            border-bottom-color: #E07A5F;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #81B29A;
+            color: #F8F7F4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(224, 122, 95, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .risk-row:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-[#F8F7F4]/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#3D405B]">KI im Fokus</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#foundations" class="nav-link font-semibold pb-1">Grundlagen</a>
+                <a href="#synergy" class="nav-link font-semibold pb-1">Die Synergie</a>
+                <a href="#applications" class="nav-link font-semibold pb-1">Anwendungen</a>
+                <a href="#risks" class="nav-link font-semibold pb-1">Risiken & Zukunft</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#81B29A]">
+                    <option value="#home">Home</option>
+                    <option value="#foundations">Grundlagen</option>
+                    <option value="#synergy">Die Synergie</option>
+                    <option value="#applications">Anwendungen</option>
+                    <option value="#risks">Risiken & Zukunft</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="home" class="text-center min-h-[60vh] flex flex-col justify-center items-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-[#3D405B] mb-4 leading-tight">Generative KI & KI-Agenten</h1>
+            <p class="text-lg md:text-xl text-[#3D405B]/80 max-w-3xl">
+                Eine interaktive Analyse der Technologien, Synergien und strategischen Implikationen. Entdecken Sie, wie die Konvergenz von kreativer KI und autonomen Systemen die nächste Evolutionsstufe der Intelligenz einleitet.
+            </p>
+        </section>
+
+        <section id="foundations" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Die Bausteine der neuen KI-Ära</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">Die aktuelle KI-Revolution stützt sich auf zwei Säulen: Generative KI, die Neues erschafft, und KI-Agenten, die autonom handeln. Verstehen Sie hier die Kernkonzepte beider Domänen.</p>
+
+            <div class="flex justify-center mb-8">
+                <button data-tab="genai" class="tab-button active text-lg font-semibold py-2 px-6 rounded-lg mr-4">Generative KI</button>
+                <button data-tab="agents" class="tab-button text-lg font-semibold py-2 px-6 rounded-lg">KI-Agenten</button>
+            </div>
+
+            <div id="genai-content" class="tab-content">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="content-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Was ist Generative KI?</h3>
+                        <p class="text-gray-700 mb-4">Generative KI ist darauf spezialisiert, neue, originelle Inhalte zu erstellen. Anstatt nur Daten zu analysieren, beantwortet sie die Frage "Was könnte sein?" und erzeugt Texte, Bilder oder Code, die den Mustern aus ihren Trainingsdaten folgen.</p>
+                        <div class="bg-[#81B29A]/20 p-4 rounded-lg">
+                            <h4 class="font-bold text-[#3D405B]">Vergleich: Generativ vs. Prädiktiv</h4>
+                            <div class="mt-2 text-sm text-gray-800">
+                                <p class="mb-1"><strong class="text-[#81B29A]">Prädiktive KI:</strong> "Wie hoch ist die Wahrscheinlichkeit, dass dieser Kunde abwandert?"</p>
+                                <p><strong class="text-[#E07A5F]">Generative KI:</strong> "Schreibe einen überzeugenden Marketing-Text, um diesen Kunden zu halten."</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Technologische Säulen</h3>
+                        <div class="chart-container">
+                            <canvas id="architectureChart"></canvas>
+                        </div>
+                         <p class="text-center text-sm text-gray-500 mt-2">Vergleich der Stärken von KI-Architekturen. Klicken Sie auf die Legende, um eine Architektur auszublenden.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="agents-content" class="tab-content hidden">
+                 <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="content-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Was ist ein KI-Agent?</h3>
+                        <p class="text-gray-700 mb-4">Ein KI-Agent ist ein autonomes System, das seine Umgebung wahrnimmt, Entscheidungen trifft und zielgerichtet handelt. Er ist nicht nur reaktiv, sondern proaktiv und verfolgt übergeordnete Ziele, von der Buchung einer Reise bis zur Steuerung eines Roboters.</p>
+                        <div class="bg-[#E07A5F]/20 p-4 rounded-lg">
+                             <h4 class="font-bold text-[#3D405B]">Der Wahrnehmungs-Aktions-Zyklus</h4>
+                             <div id="perception-cycle" class="flex justify-around items-center h-40 mt-4 text-center">
+                                <!-- Cycle will be rendered here by JS -->
+                             </div>
+                        </div>
+                    </div>
+                     <div class="content-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Taxonomie der Agenten</h3>
+                        <p class="text-gray-700 mb-4">Agenten lassen sich nach ihrer Komplexität klassifizieren. Klicken Sie auf eine Stufe, um mehr zu erfahren.</p>
+                        <div id="agent-taxonomy" class="space-y-2">
+                           <!-- Taxonomy will be rendered here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="synergy" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Die Synergie: Wenn KI denkt und handelt</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">Die wahre Revolution entsteht durch die Verschmelzung: Generative KI liefert das "Gehirn" für das schlussfolgernde Denken, während die Agenten-Architektur die "Hände und Füße" für die Ausführung in der realen Welt bereitstellt. Interagieren Sie mit dem Diagramm, um die Komponenten zu verstehen.</p>
+
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-8">
+                <div id="synergy-diagram" class="w-full lg:w-1/2 flex justify-center items-center relative h-96">
+                    <div id="synergy-brain" data-component="brain" class="synergy-component cursor-pointer z-10 w-40 h-40 bg-[#3D405B] text-white rounded-full flex items-center justify-center text-center font-bold text-lg shadow-2xl">LLM als<br>Gehirn</div>
+                    <div id="synergy-memory" data-component="memory" class="synergy-component cursor-pointer absolute top-0 left-10 w-28 h-28 bg-[#81B29A] text-white rounded-full flex items-center justify-center text-center font-semibold shadow-lg">Gedächtnis</div>
+                    <div id="synergy-tools" data-component="tools" class="synergy-component cursor-pointer absolute top-0 right-10 w-28 h-28 bg-[#81B29A] text-white rounded-full flex items-center justify-center text-center font-semibold shadow-lg">Werkzeuge</div>
+                    <div id="synergy-planning" data-component="planning" class="synergy-component cursor-pointer absolute bottom-0 w-28 h-28 bg-[#81B29A] text-white rounded-full flex items-center justify-center text-center font-semibold shadow-lg">Planung &<br>Aktion</div>
+                    <canvas id="synergy-lines" class="absolute top-0 left-0 w-full h-full"></canvas>
+                </div>
+                <div class="w-full lg:w-1/2 content-card p-6 rounded-lg min-h-[24rem]">
+                    <div id="synergy-text-content">
+                        <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Das kognitive Zentrum</h3>
+                        <p class="text-gray-700">Große Sprachmodelle (LLMs) bilden das schlussfolgernde Herzstück eines Agenten. Sie verstehen komplexe, unstrukturierte Ziele, zerlegen sie in logische Schritte und entscheiden, welche Werkzeuge benötigt werden. Klicken Sie auf eine Komponente, um ihre Rolle zu entdecken.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="applications" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Anwendungen in der Praxis</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">Von der Automatisierung im Unternehmen bis zur Beschleunigung der Forschung – die Synergie von GenAI und Agenten schafft bereits heute einen enormen Mehrwert. Erkunden Sie hier einige Fallstudien.</p>
+
+            <div class="flex justify-center mb-8 space-x-4">
+                <button data-filter="all" class="filter-button bg-[#81B29A] text-white font-semibold py-2 px-4 rounded-lg">Alle</button>
+                <button data-filter="business" class="filter-button bg-white text-[#3D405B] font-semibold py-2 px-4 rounded-lg border border-gray-300">Unternehmen</button>
+                <button data-filter="science" class="filter-button bg-white text-[#3D405B] font-semibold py-2 px-4 rounded-lg border border-gray-300">Wissenschaft</button>
+                <button data-filter="creative" class="filter-button bg-white text-[#3D405B] font-semibold py-2 px-4 rounded-lg border border-gray-300">Kreativwirtschaft</button>
+            </div>
+            <div id="applications-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Applications will be rendered here by JS -->
+            </div>
+        </section>
+
+        <section id="risks" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Risiken, Governance & Zukunft</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">Die immense Macht autonomer KI-Systeme erfordert einen verantwortungsvollen Umgang. Verstehen Sie die Risiken und die strategischen Empfehlungen, um die Zukunft sicher zu gestalten.</p>
+
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="content-card p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Risiko-Matrix</h3>
+                    <p class="text-gray-600 mb-4">Ein Überblick über die wesentlichen Herausforderungen, von technischen Problemen bis hin zu ethischen und rechtlichen Fragen.</p>
+                     <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-[#3D405B] text-white">
+                                <tr>
+                                    <th class="p-3">Kategorie</th>
+                                    <th class="p-3">Risiko</th>
+                                    <th class="p-3">Beispiel</th>
+                                </tr>
+                            </thead>
+                            <tbody id="risk-table-body">
+                                <!-- Risks will be rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-card p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-[#3D405B]">Strategische Empfehlungen</h3>
+                    <p class="text-gray-600 mb-4">Um im Zeitalter der KI-Agenten erfolgreich zu sein, sollten Unternehmen eine ganzheitliche Strategie verfolgen.</p>
+                    <ul id="recommendations-list" class="space-y-4">
+                       <!-- Recommendations will be rendered here by JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#3D405B] text-white mt-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>Interaktiver Report zu Generativer KI & KI-Agenten.</p>
+            <p class="text-sm text-gray-400 mt-2">Basierend auf der Analyse "Generative KI und KI-Agenten: Eine umfassende Analyse der Technologien, Synergien und strategischen Implikationen".</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const appData = {
+                architectures: {
+                    labels: ['Kontextverständnis', 'Output-Qualität', 'Steuerbarkeit', 'Trainingsstabilität', 'Inferenz-Geschwindigkeit'],
+                    datasets: [
+                        { label: 'Transformer', data: [5, 4, 4, 4, 5], backgroundColor: 'rgba(224, 122, 95, 0.2)', borderColor: '#E07A5F', pointBackgroundColor: '#E07A5F' },
+                        { label: 'GANs', data: [2, 5, 3, 2, 5], backgroundColor: 'rgba(61, 64, 91, 0.2)', borderColor: '#3D405B', pointBackgroundColor: '#3D405B' },
+                        { label: 'Diffusion', data: [4, 5, 5, 5, 2], backgroundColor: 'rgba(129, 178, 154, 0.2)', borderColor: '#81B29A', pointBackgroundColor: '#81B29A' }
+                    ]
+                },
+                agentTaxonomy: [
+                    { name: 'Einfacher Reflexagent', description: 'Reagiert nur auf aktuelle Reize. Kein Gedächtnis, keine Planung. Beispiel: Ein Thermostat.', icon: '🌡️' },
+                    { name: 'Modellbasierter Agent', description: 'Nutzt ein internes Weltmodell, um nicht sichtbare Zustände zu verfolgen. Beispiel: Ein selbstfahrendes Auto, das verdeckte Fahrzeuge im Modell behält.', icon: '🗺️' },
+                    { name: 'Zielbasierter Agent', description: 'Plant Aktionen, um explizite Ziele zu erreichen. Beispiel: Ein Lagerroboter, der die effizienteste Route plant.', icon: '🎯' },
+                    { name: 'Nutzenbasierter Agent', description: 'Maximiert eine Nutzenfunktion, um den besten Kompromiss zwischen Zielen zu finden. Beispiel: Ein Reiseassistent, der Kosten und Komfort optimiert.', icon: '⚖️' },
+                    { name: 'Lernender Agent', description: 'Verbessert seine Leistung durch Erfahrung und Feedback. Beispiel: Eine KI, die durch Spielen lernt (AlphaGo).', icon: '🧠' }
+                ],
+                perceptionCycle: [
+                    { name: 'Wahrnehmung', icon: '👁️' },
+                    { name: 'Denken', icon: '🤔' },
+                    { name: 'Handlung', icon: '⚙️' },
+                    { name: 'Lernen', icon: '💡' }
+                ],
+                synergyContent: {
+                    brain: { title: 'LLM als Gehirn', text: 'Das LLM ist das kognitive Zentrum. Es versteht unstrukturierte Ziele in natürlicher Sprache, zerlegt komplexe Aufgaben in handhabbare Schritte und entwickelt eine Strategie zur Lösung.' },
+                    memory: { title: 'Gedächtnis', text: 'Da LLMs zustandslos sind, stellt die Agenten-Architektur ein Gedächtnis bereit. Ein Kurzzeitgedächtnis für den aktuellen Kontext und ein Langzeitgedächtnis (oft über Vektordatenbanken) für frühere Interaktionen.' },
+                    tools: { title: 'Werkzeugnutzung', text: 'Agenten können mit der Außenwelt über Werkzeuge interagieren. Das LLM entscheidet, welches Werkzeug (z.B. eine API oder eine Websuche) es benötigt, und die Architektur führt den Aufruf aus und liefert das Ergebnis zurück.' },
+                    planning: { title: 'Planung & Aktion', text: 'Die Architektur führt den vom LLM erstellten Plan aus. Sie verwaltet die Kette von Aktionen, handhabt Fehler und gibt Feedback an das LLM, damit dieses den Plan bei Bedarf anpassen kann.' }
+                },
+                applications: [
+                    { category: 'business', title: 'Automatisierter Kundenservice', description: 'Ein Agent analysiert eine Kundenanfrage, prüft Daten in CRM- und ERP-Systemen und löst autonom eine Bestellung oder eine personalisierte Antwort aus.', icon: '💬' },
+                    { category: 'business', title: 'Due-Diligence bei M&A', description: 'Ein Agent analysiert in Stunden riesige Datenmengen, identifiziert Risiken und erstellt einen umfassenden Bericht – ein Prozess, der manuell Wochen dauert.', icon: '📊' },
+                    { category: 'science', title: 'Der KI-Ingenieur', description: 'Ein Team aus spezialisierten Agenten löst komplexe Probleme der Strömungsmechanik, führt Simulationen durch und verfasst eine komplette wissenschaftliche Publikation.', icon: '🔬' },
+                    { category: 'science', title: 'Agent Laboratory', description: 'Simuliert ein ganzes Forschungsteam, das autonom Literaturrecherchen durchführt, Experimente plant und ausführt und die Ergebnisse in einem Paper zusammenfasst.', icon: '🧪' },
+                    { category: 'creative', title: 'Automatisierte Filmproduktion', description: 'Ein Agent orchestriert den gesamten Workflow: Er erstellt Storyboards, generiert visuelle Assets mit Text-zu-Bild-Modellen und komponiert eine passende Filmmusik.', icon: '🎬' },
+                    { category: 'creative', title: 'Roboter-gesteuerte Fabrik', description: 'Embodied Agents steuern dynamisch ganze Produktionslinien, konfigurieren Maschinen um, fordern Wartung an und optimieren Materialflüsse in Echtzeit.', icon: '🤖' }
+                ],
+                risks: [
+                    { category: 'Technisch', risk: 'Halluzinationen', example: 'Ein KI-Anwalt erfindet nicht existierende Rechtsfälle für einen Schriftsatz.' },
+                    { category: 'Ethisch', risk: 'Bias-Verstärkung', example: 'Ein Bewerbungs-Agent benachteiligt systematisch bestimmte demografische Gruppen.' },
+                    { category: 'Sicherheit', risk: 'Prompt Injection', example: 'Ein Angreifer versteckt in einer E-Mail eine Anweisung, die den Agenten veranlasst, Kundendaten zu leaken.' },
+                    { category: 'Rechtlich', risk: 'Urheberrechtsverletzung', example: 'Ein Bildgenerator kopiert ein geschütztes Werk aus den Trainingsdaten.' },
+                    { category: 'Kontrolle', risk: 'Alignment-Problem', example: 'Ein Handels-Agent maximiert den Gewinn durch illegale Marktmanipulation.' }
+                ],
+                recommendations: [
+                    { title: 'Frühzeitig experimentieren', description: 'Bauen Sie jetzt Kompetenzen auf, indem Sie Prototypen entwickeln und Anwendungsfälle in kontrollierten Umgebungen testen.', icon: '🚀' },
+                    { title: 'Robuste Governance etablieren', description: 'Entwickeln Sie proaktiv interne Richtlinien, Sicherheitskonzepte und Kontrollmechanismen, anstatt auf den Gesetzgeber zu warten.', icon: '🛡️' },
+                    { title: 'Mitarbeiter befähigen', description: 'Investieren Sie in Weiterbildung, um die Zusammenarbeit zwischen Mensch und KI zu fördern und neue Jobprofile zu schaffen.', icon: '🎓' },
+                    { title: 'Kulturellen Wandel gestalten', description: 'Positionieren Sie KI als kollaborativen Partner, der menschliche Fähigkeiten erweitert, nicht als Bedrohung für Arbeitsplätze.', icon: '🤝' }
+                ]
+            };
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+            
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const target = tab.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        if (content.id === `${target}-content`) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const archCtx = document.getElementById('architectureChart').getContext('2d');
+            new Chart(archCtx, {
+                type: 'radar',
+                data: appData.architectures,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(61, 64, 91, 0.2)' },
+                            grid: { color: 'rgba(61, 64, 91, 0.2)' },
+                            pointLabels: { font: { size: 12 }, color: '#3D405B' },
+                            ticks: { backdropColor: '#F8F7F4', color: '#3D405B' },
+                            suggestedMin: 0,
+                            suggestedMax: 5
+                        }
+                    }
+                }
+            });
+            
+            const taxonomyContainer = document.getElementById('agent-taxonomy');
+            appData.agentTaxonomy.forEach(agent => {
+                const div = document.createElement('div');
+                div.className = 'border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors';
+                div.innerHTML = `
+                    <div class="font-bold flex items-center">${agent.icon} <span class="ml-2">${agent.name}</span></div>
+                    <div class="text-sm text-gray-600 mt-2 hidden">${agent.description}</div>
+                `;
+                div.addEventListener('click', () => {
+                    const desc = div.querySelector('.text-sm');
+                    desc.classList.toggle('hidden');
+                });
+                taxonomyContainer.appendChild(div);
+            });
+
+            const cycleContainer = document.getElementById('perception-cycle');
+            appData.perceptionCycle.forEach((step, index) => {
+                const div = document.createElement('div');
+                div.className = 'cycle-step p-2 rounded-lg transition-all duration-500';
+                div.innerHTML = `<div class="text-4xl">${step.icon}</div><div class="font-semibold text-sm mt-1">${step.name}</div>`;
+                cycleContainer.appendChild(div);
+            });
+
+            let activeCycleStep = 0;
+            const cycleSteps = cycleContainer.querySelectorAll('.cycle-step');
+            function animateCycle() {
+                cycleSteps.forEach(step => {
+                    step.classList.remove('bg-[#E07A5F]/40', 'scale-110');
+                });
+                cycleSteps[activeCycleStep].classList.add('bg-[#E07A5F]/40', 'scale-110');
+                activeCycleStep = (activeCycleStep + 1) % cycleSteps.length;
+            }
+            setInterval(animateCycle, 2000);
+
+
+            const synergyComponents = document.querySelectorAll('.synergy-component');
+            const synergyTextContent = document.getElementById('synergy-text-content');
+            synergyComponents.forEach(component => {
+                component.addEventListener('click', () => {
+                    const componentKey = component.dataset.component;
+                    const content = appData.synergyContent[componentKey];
+                    
+                    synergyComponents.forEach(c => c.classList.remove('ring-4', 'ring-[#E07A5F]'));
+                    component.classList.add('ring-4', 'ring-[#E07A5F]');
+
+                    synergyTextContent.innerHTML = `
+                        <h3 class="text-2xl font-bold mb-4 text-[#E07A5F]">${content.title}</h3>
+                        <p class="text-gray-700">${content.text}</p>
+                    `;
+                });
+            });
+
+            function drawSynergyLines() {
+                const canvas = document.getElementById('synergy-lines');
+                const ctx = canvas.getContext('2d');
+                const container = document.getElementById('synergy-diagram');
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                
+                const brain = document.getElementById('synergy-brain');
+                const memory = document.getElementById('synergy-memory');
+                const tools = document.getElementById('synergy-tools');
+                const planning = document.getElementById('synergy-planning');
+
+                const getCenter = (el) => ({
+                    x: el.offsetLeft + el.offsetWidth / 2,
+                    y: el.offsetTop + el.offsetHeight / 2
+                });
+
+                const brainCenter = getCenter(brain);
+                
+                ctx.strokeStyle = 'rgba(61, 64, 91, 0.3)';
+                ctx.lineWidth = 3;
+
+                [memory, tools, planning].forEach(el => {
+                    const elCenter = getCenter(el);
+                    ctx.beginPath();
+                    ctx.moveTo(brainCenter.x, brainCenter.y);
+                    ctx.lineTo(elCenter.x, elCenter.y);
+                    ctx.stroke();
+                });
+            }
+            drawSynergyLines();
+            window.addEventListener('resize', drawSynergyLines);
+
+
+            const applicationsGrid = document.getElementById('applications-grid');
+            function renderApplications(filter) {
+                applicationsGrid.innerHTML = '';
+                const filteredApps = filter === 'all' 
+                    ? appData.applications 
+                    : appData.applications.filter(app => app.category === filter);
+
+                filteredApps.forEach(app => {
+                    const card = document.createElement('div');
+                    card.className = `content-card p-6 rounded-lg app-card flex flex-col items-start`;
+                    card.setAttribute('data-category', app.category);
+                    card.innerHTML = `
+                        <div class="text-4xl mb-4">${app.icon}</div>
+                        <h4 class="text-xl font-bold text-[#3D405B] mb-2">${app.title}</h4>
+                        <p class="text-gray-600 flex-grow">${app.description}</p>
+                    `;
+                    applicationsGrid.appendChild(card);
+                });
+            }
+
+            const filterButtons = document.querySelectorAll('.filter-button');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-[#81B29A]', 'text-white');
+                        btn.classList.add('bg-white', 'text-[#3D405B]');
+                    });
+                    button.classList.add('bg-[#81B29A]', 'text-white');
+                    button.classList.remove('bg-white', 'text-[#3D405B]');
+                    renderApplications(button.dataset.filter);
+                });
+            });
+
+            renderApplications('all');
+            
+            const riskTableBody = document.getElementById('risk-table-body');
+            appData.risks.forEach(risk => {
+                const row = document.createElement('tr');
+                row.className = 'risk-row border-b border-gray-200';
+                row.innerHTML = `
+                    <td class="p-3 font-semibold">${risk.category}</td>
+                    <td class="p-3">${risk.risk}</td>
+                    <td class="p-3 text-sm text-gray-600">${risk.example}</td>
+                `;
+                riskTableBody.appendChild(row);
+            });
+            
+            const recsList = document.getElementById('recommendations-list');
+            appData.recommendations.forEach(rec => {
+                const item = document.createElement('li');
+                item.className = 'flex items-start';
+                item.innerHTML = `
+                    <div class="text-2xl mr-4">${rec.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-[#3D405B]">${rec.title}</h4>
+                        <p class="text-gray-600 text-sm">${rec.description}</p>
+                    </div>
+                `;
+                recsList.appendChild(item);
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 60) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').slice(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
